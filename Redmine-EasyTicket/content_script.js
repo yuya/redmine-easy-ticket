@@ -50,7 +50,7 @@ if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
     }
 
     function disableConfirm() {
-        chrome.extension.sendMessage({}, function(response) {
+        chrome.extension.sendMessage({}, function (response) {
             var readyStateCheckInterval = setInterval(function () {
                 var script;
 
@@ -118,7 +118,6 @@ if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
 
         if (elements.form.status) {
             each(focusbleElements, function (element, i) {
-                console.log(element);
                 element.setAttribute("tabindex", ++i + "");
             });
 

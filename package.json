@@ -1,7 +1,7 @@
 {
   "name": "Redmine-EasyTicket",
   "title": "Redmine Easy Ticket",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Redmine のチケット操作をキーボードだけで楽に更新できるようになります",
   "main": "index.js",
   "scripts": {
