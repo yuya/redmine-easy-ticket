@@ -1,5 +1,7 @@
+var url = location.href;
+
 if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
-    chrome.extension.sendRequest({}, function(response) {});
+    chrome.extension.sendRequest({}, function () {});
 
     var KEY_CODE = {
             ENTER : 13,
@@ -17,7 +19,6 @@ if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
                 commit : AryProto.slice.call(document.getElementsByName("commit")).pop()
             }
         },
-        origBeforeUnload = global.onbeforeunload,
         focusbleElements;
 
     function isNodeList(obj) {
@@ -48,12 +49,36 @@ if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
         }
     }
 
+    function disableConfirm() {
+        chrome.extension.sendMessage({}, function(response) {
+            var readyStateCheckInterval = setInterval(function () {
+                var script;
+
+                if (document.readyState === "complete") {
+                    clearInterval(readyStateCheckInterval);
+
+                    script           = document.createElement("script");
+                    script.type      = "text/javascript";
+                    script.innerHTML = "onbeforeunload = function () {};";
+
+                    document.body.appendChild(script);
+                }
+            }, 10);
+        });
+    }
+
     function visibleElement(element) {
         element.setAttribute("style", "");
     }
 
     function hiddenElement(element) {
         element.setAttribute("style","overflow: hidden; visibility: hidden; height: 0;");
+    }
+
+    function showAndScroll() {
+        visibleElement(elements.update);
+        elements.form.status.focus();
+        scrollTo(0, elements.update.offsetTop);
     }
 
     function addPrefixNumber(options) {
@@ -91,22 +116,24 @@ if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
             elements.button.commit
         ];
 
-        each(focusbleElements, function (element, i) {
-            element.setAttribute("tabindex", ++i + "");
-        });
+        if (elements.form.status) {
+            each(focusbleElements, function (element, i) {
+                console.log(element);
+                element.setAttribute("tabindex", ++i + "");
+            });
 
-        addPrefixNumber(elements.form.status.options);
-        addPrefixNumber(elements.form.priority.options);
-    }
-
-    function showAndScroll() {
-        visibleElement(elements.update);
-        elements.form.status.focus();
-        window.scrollTo(0, elements.update.offsetTop);
+            addPrefixNumber(elements.form.status.options);
+            addPrefixNumber(elements.form.priority.options);
+        }
     }
 
     function initialize() {
         initElements();
+
+        if (!elements.form.status) {
+            elements.update.setAttribute("style", "display: none;");
+            return;
+        }
 
         elements.button.edit.addEventListener("keydown", function (event) {
             if (event.keyCode === KEY_CODE.SPACE) {
@@ -130,7 +157,7 @@ if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
                 event.preventDefault();
                 event.stopPropagation();
 
-                global.onbeforeunload = undefined;
+                disableConfirm();
                 visibleElement(elements.loader);
                 elements.form.instance.submit();
             }
