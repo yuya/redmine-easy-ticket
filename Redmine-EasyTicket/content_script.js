@@ -1,6 +1,6 @@
 var url = location.href;
 
-if (/redmine/.test(url) && /\/issues\/\d+$/.test(url)) {
+if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
     chrome.extension.sendRequest({}, function () {});
 
     var KEY_CODE = {
