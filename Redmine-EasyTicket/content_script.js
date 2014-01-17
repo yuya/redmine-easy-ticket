@@ -8,21 +8,22 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
             SHIFT : 16,
             SPACE : 32
         },
-        AryProto = Array.prototype,
-        ObjProto = Object.prototype,
+        toArray  = function (obj) {
+            return [].slice.call(obj);
+        },
         elements = {
             form   : null,
             loader : document.getElementById("ajax-indicator"),
             update : document.getElementById("update"),
             button : {
-                edit   : document.getElementsByClassName("icon-edit")[0],
-                commit : AryProto.slice.call(document.getElementsByName("commit")).pop()
+                edit   : toArray(document.getElementsByClassName("icon-edit")),
+                commit : toArray(document.getElementsByName("commit")).pop()
             }
         },
         focusbleElements;
 
     function isNodeList(obj) {
-        var type = ObjProto.toString.call(obj);
+        var type = {}.toString.call(obj);
 
         return type === "[object NodeList]" || type === "[object HTMLCollection]";
     }
@@ -31,7 +32,7 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
         var i = 0,
             len, ary, key;
 
-        if (Array.isArray(collection) || isNodeList(collection)) {
+        if (Array.isArray(collection)) {
             len = collection.length;
 
             for (; len; ++i, --len) {
@@ -72,7 +73,7 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
     }
 
     function hiddenElement(element) {
-        element.setAttribute("style","overflow: hidden; visibility: hidden; height: 0;");
+        element.setAttribute("style", "overflow: hidden; visibility: hidden; height: 0;");
     }
 
     function showAndScroll() {
@@ -81,21 +82,33 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
         scrollTo(0, elements.update.offsetTop);
     }
 
-    function addPrefixNumber(options) {
-        var i = 0, len = options.length,
-            option, number;
+    function addPrefixNumber(options, idx, max) {
+        idx = idx || 0;
+        max = max || 9;
 
-        for (; len; ++i, --len) {
-            option = options[i];
-            number = option.firstChild.nodeValue;
+        var i     = 0,
+            len   = options.length - idx,
+            start = idx,
+            option, value;
 
-            if (i < 9) {
-                option.innerHTML = (i + 1) + ": " + number;
+        for (; len; ++i, ++idx, --len) {
+            option = options[idx];
+
+            if (!option) {
+                return;
+            }
+
+            value = option.firstChild.nodeValue;
+
+            if (i < max) {
+                option.innerHTML = (start === 0 ? idx + 1 : idx) + ": " + value;
             }
         }
     }
 
     function initElements() {
+        var ratio100;
+
         hiddenElement(elements.update);
 
         elements.form = {
@@ -107,7 +120,7 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
             instance : document.getElementById("issue-form")
         };
         focusbleElements = [
-            elements.button.edit,
+            elements.button.edit[0],
             elements.form.status,
             elements.form.priority,
             elements.form.assigned,
@@ -123,6 +136,10 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
 
             addPrefixNumber(elements.form.status.options);
             addPrefixNumber(elements.form.priority.options);
+            addPrefixNumber(elements.form.ratio.options, 1);
+
+            ratio100           = toArray(elements.form.ratio.options).pop();
+            ratio100.innerHTML = "!: " + ratio100.firstChild.nodeValue;
         }
     }
 
@@ -134,22 +151,24 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
             return;
         }
 
-        elements.button.edit.addEventListener("keydown", function (event) {
-            if (event.keyCode === KEY_CODE.SPACE) {
+        each(elements.button.edit, function (element) {
+            element.addEventListener("keydown", function (event) {
+                if (event.keyCode === KEY_CODE.SPACE) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    showAndScroll();
+                }
+            }, false);
+
+            element.addEventListener("click", function (event) {
                 event.preventDefault();
                 event.stopPropagation();
 
                 showAndScroll();
-            }
-        }, false);
-
-        elements.button.edit.addEventListener("click", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            showAndScroll();
-            return false;
-        }, false);
+                return false;
+            }, false);
+        });
 
         elements.form.notes.addEventListener("keypress", function (event) {
             if (event.keyCode === KEY_CODE.ENTER && event.shiftKey) {
