@@ -6,6 +6,7 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
     var KEY_CODE = {
             ENTER : 13,
             SHIFT : 16,
+            CTRL  : 17,
             SPACE : 32
         },
         toArray  = function (obj) {
@@ -69,10 +70,18 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
     }
 
     function visibleElement(element) {
+        if (!element) {
+            return;
+        }
+
         element.setAttribute("style", "");
     }
 
     function hiddenElement(element) {
+        if (!element) {
+            return;
+        }
+
         element.setAttribute("style", "overflow: hidden; visibility: hidden; height: 0;");
     }
 
@@ -85,6 +94,10 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
     function addPrefixNumber(options, idx, max) {
         idx = idx || 0;
         max = max || 9;
+
+        if (!options) {
+            return;
+        }
 
         var i     = 0,
             len   = options.length - idx,
@@ -131,11 +144,19 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
 
         if (elements.form.status) {
             each(focusbleElements, function (element, i) {
-                element.setAttribute("tabindex", ++i + "");
+                if (element) {
+                    element.setAttribute("tabindex", ++i + "");
+                }
             });
 
             addPrefixNumber(elements.form.status.options);
+        }
+
+        if (elements.form.priority) {
             addPrefixNumber(elements.form.priority.options);
+        }
+
+        if (elements.form.ratio) {
             addPrefixNumber(elements.form.ratio.options, 1);
 
             ratio100           = toArray(elements.form.ratio.options).pop();
@@ -171,7 +192,7 @@ if (/redmine/.test(url) && /\/issues\/.+\d$/.test(url)) {
         });
 
         elements.form.notes.addEventListener("keypress", function (event) {
-            if (event.keyCode === KEY_CODE.ENTER && event.shiftKey) {
+            if (event.keyCode === KEY_CODE.ENTER && event.ctrlKey) {
                 event.preventDefault();
                 event.stopPropagation();
 

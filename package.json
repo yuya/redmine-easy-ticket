@@ -1,7 +1,7 @@
 {
   "name": "Redmine-EasyTicket",
   "title": "Redmine Easy Ticket",
-  "version": "1.0.3",
+  "version": "1.0.6",
   "description": "Redmine のチケット操作をキーボードだけで楽に更新できるようになります",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,6 @@
   "author": "Yuya Hashimoto",
   "license": "MIT",
   "readmeFilename": "README.md",
-  "gitHead": "e8fd4fd2f6fc5e35e6124f1583be0d75ac909293",
   "devDependencies": {
     "grunt": "~0.4.1",
     "matchdep": "~0.1.2",
